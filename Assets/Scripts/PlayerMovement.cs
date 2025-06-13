@@ -24,6 +24,7 @@ public class PlayerMovement : MonoBehaviour
     //KeyBinds
     public KeyCode jumpKey = KeyCode.Space;
     public KeyCode crouchKey = KeyCode.LeftControl;
+    
 
     //Ground Check
     public float playerHeight;
