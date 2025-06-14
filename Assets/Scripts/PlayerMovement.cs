@@ -1,6 +1,7 @@
 
 using UnityEngine;
 using UnityEngine.EventSystems;
+using System.Collections;
 
 public class PlayerMovement : MonoBehaviour
 {
@@ -117,29 +118,45 @@ public class PlayerMovement : MonoBehaviour
         rb.useGravity = !OnSlope();
     }
 
+    public void ResetJumpState()
+    {
+        readyToJump = true;
+        transform.localScale = new Vector3(transform.localScale.x, startYScale, transform.localScale.z);
+
+        // Simulate short delay to allow physics to catch up
+        StartCoroutine(RecheckGround());
+        
+    }
+
+    private IEnumerator RecheckGround()
+    {
+        yield return new WaitForSeconds(0.05f);
+        grounded = true; // Temporarily force grounded
+    }
+
     private void SpeedControl()
     {
-        
+
 
         //Limiting speed of slope
         if (OnSlope())
         {
-            if(rb.linearVelocity.magnitude > moveSpeed)
-            rb.linearVelocity = rb.linearVelocity.normalized * moveSpeed;
+            if (rb.linearVelocity.magnitude > moveSpeed)
+                rb.linearVelocity = rb.linearVelocity.normalized * moveSpeed;
         }
         else
         {
             Vector3 flatVel = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
 
-        //limit velocity if needed
-        if (flatVel.magnitude > moveSpeed)
-        {
-            Vector3 limitedVel = flatVel.normalized * moveSpeed;
-            rb.linearVelocity = new Vector3(limitedVel.x, rb.linearVelocity.y, limitedVel.z);
+            //limit velocity if needed
+            if (flatVel.magnitude > moveSpeed)
+            {
+                Vector3 limitedVel = flatVel.normalized * moveSpeed;
+                rb.linearVelocity = new Vector3(limitedVel.x, rb.linearVelocity.y, limitedVel.z);
+            }
         }
-        }
-            
-            
+
+
     }
 
 

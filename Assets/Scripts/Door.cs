@@ -4,6 +4,7 @@ public class Door : MonoBehaviour
 {
     public float openAngle = 90f;     // Angle to rotate when door opens
     public float openSpeed = 2f;      // Speed of door opening/closing
+    public bool requiresKeycard = true;
 
     private bool isOpen = false;      // Door state
     private Quaternion closedRotation;
@@ -31,6 +32,8 @@ public class Door : MonoBehaviour
             transform.rotation = Quaternion.Slerp(transform.rotation, openRotation, Time.deltaTime * openSpeed);
         else
             transform.rotation = Quaternion.Slerp(transform.rotation, closedRotation, Time.deltaTime * openSpeed);
+
+    
     }
     
 

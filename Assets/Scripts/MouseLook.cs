@@ -12,8 +12,7 @@ public class MouseLook : MonoBehaviour
 
     void Start()
     {
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
+        
     }
 
     void Update()
@@ -31,5 +30,14 @@ public class MouseLook : MonoBehaviour
         //Rotate cam and orientation
         transform.rotation = Quaternion.Euler(xRotation, yRotation, 0);
         Orientation.rotation = Quaternion.Euler(0, yRotation, 0);
+    }
+
+    public void ResetLook()
+    {
+        xRotation = 0f;
+        yRotation = 0f;
+
+        transform.localRotation = Quaternion.Euler(0f, 0f, 0f);
+        Orientation.localRotation = Quaternion.Euler(0f, 0f, 0f);
     }
 }
