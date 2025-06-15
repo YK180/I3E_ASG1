@@ -40,3 +40,27 @@ Puzzle solutions
 Take your time to complete the parkour as rushing it may result in a mistep and falling to your death
 
 Take your time to find the way out of the maze and reduce the amount of damage taken from hitting the walls.
+
+
+References & Credits
+
+Player Movement Script - https://www.youtube.com/watch?v=f473C43s8nE and https://www.youtube.com/watch?v=xCxSjgYTw9c
+
+Box asset - https://assetstore.unity.com/packages/3d/props/furniture/cartoon-wooden-box-242926|
+
+Keycard material and texture - https://assetstore.unity.com/packages/3d/props/retro-psx-horror-puzzle-item-pack-icon-lowpoly-250188
+
+Coin model, material and texture - https://assetstore.unity.com/packages/3d/props/simple-gems-and-items-ultimate-animated-customizable-pack-73764
+
+Wooden planks texture - https://t3.ftcdn.net/jpg/01/69/83/36/360_F_169833636_K0rpNa68keobmQrDhEUn1nbFcy8cmfCw.jpg
+
+Sea texture - https://media.istockphoto.com/id/1300107681/photo/surface-of-the-atlantic-ocean.jpg?s=612x612&w=0&k=20&c=w_5KDlGHRBKgLzjyA6KrdFHDlrO4B2M4LtflWAyzGhc=
+
+Coin collection audio - https://pixabay.com/sound-effects/coin-257878/
+
+Death audio - https://pixabay.com/sound-effects/male-death-scream-horror-352706/
+
+Taking damage audio - https://pixabay.com/sound-effects/ouchmp3-14591/
+
+Victory audio - https://pixabay.com/sound-effects/winning-218995/
+                         
