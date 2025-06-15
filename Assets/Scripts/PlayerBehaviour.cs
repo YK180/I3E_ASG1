@@ -1,39 +1,132 @@
-    using UnityEngine;
-    using TMPro;
-    using System.Collections;
+/*
+* Author: Tan Ye Kai
+* Date: 15/6/2025
+* Description: PlayerBehaviour Script
+*/
+
+using UnityEngine;
+using TMPro;
+using System.Collections;
 using System;
+
+/// <summary>
+/// Controls player behavior such as coin collection, health, interaction, death, and respawn.
+/// </summary>
 public class PlayerBehaviour : MonoBehaviour
-    {
-        public int coinCount = 0;
-        public TextMeshProUGUI CoinText;
+{
+    /// <summary>
+    /// Current number of coins collected.
+    /// </summary>
+    public int coinCount = 0;
+    
+    /// <summary>
+    /// UI text to display the current coin count.
+    /// </summary>
+    public TextMeshProUGUI CoinText;
 
-        // Total number of coins required to win
-        public int totalCollectibles = 5;
+    /// <summary>
+    /// Total number of collectibles needed to win the game.
+    /// </summary>
+    public int totalCollectibles = 5;
 
-        // UI element to display win message
-        public TextMeshProUGUI winMessageText;
+   /// <summary>
+   /// UI text to show when the player wins the game.
+   /// </summary>
+    public TextMeshProUGUI winMessageText;
 
-        public float interactDistance = 3f;      // How close the player needs to be
-        public KeyCode interactKey = KeyCode.E;  // Interaction key
+    /// <summary>
+    /// Maximum distance to interact with objects.
+    /// </summary>
+    public float interactDistance = 3f;      
 
-        
-        public bool hasKeycard = false;
+    /// <summary>
+    /// Key used for interacting with objects (default: E).
+    /// </summary>
+    public KeyCode interactKey = KeyCode.E;  
 
-        public int maxHealth = 100;
-        private int currentHealth;
+    /// <summary>
+    /// True if the player has collected the keycard.
+    /// </summary>
+    public bool hasKeycard = false;
 
-        private Vector3 startPosition;
-        private Vector3 initialCameraLocalPos;
-        private Quaternion initialCameraLocalRot;
-        private Transform mainCameraTransform;
-        private MouseLook mouseLookScript;
+    /// <summary>
+    /// Maximum health of the player.
+    /// </summary>
+    public int maxHealth = 100;
 
+    /// <summary>
+    /// UI text to display interaction messages.
+    /// </summary>
+    public TextMeshProUGUI interactionMessageText;
 
-        public TextMeshProUGUI interactionMessageText;
-        public TextMeshProUGUI healthText;
-        public TextMeshProUGUI deathMessageText;
+    /// <summary>
+    /// UI text to display the player's health.
+    /// </summary>
+    public TextMeshProUGUI healthText;
 
-       
+    /// <summary>
+    /// UI text to display the death message.
+    /// </summary>
+    public TextMeshProUGUI deathMessageText;
+
+    /// <summary>
+    /// UI panel shown when the player dies.
+    /// </summary>
+    public GameObject deathScreenPanel;
+
+    /// <summary>
+    /// Sound effect played when a coin is collected.
+    /// </summary>
+    public AudioClip coinSound;
+
+    /// <summary>
+    /// Background music played upon winning.
+    /// </summary>
+    public AudioClip victoryBGM;
+
+    /// <summary>
+    /// Sound effect played when the player dies.
+    /// </summary>
+    public AudioClip deathSound;
+
+    /// <summary>
+    /// Audio source component used for sound playback.
+    /// </summary>
+    public AudioSource audioSource;
+
+    /// <summary>
+    /// The player's current health during gameplay.
+     /// </summary>
+    private int currentHealth;
+
+    /// <summary>
+    /// The starting position of the player used for respawn after death.
+    /// </summary>
+    private Vector3 startPosition;
+
+    /// <summary>
+    /// The initial local position of the main camera, used to reset camera after respawn.
+    /// </summary>
+    private Vector3 initialCameraLocalPos;
+
+    /// <summary>
+    /// The initial local rotation of the main camera, used to reset camera orientation after respawn.
+    /// </summary>
+    private Quaternion initialCameraLocalRot;
+
+    /// <summary>
+    /// Cached reference to the main camera's transform for position and rotation reset.
+    /// </summary>
+    private Transform mainCameraTransform;
+
+    /// <summary>
+    /// Reference to the MouseLook script for controlling camera rotation, disabled on death and reset on respawn.
+    /// </summary>
+    private MouseLook mouseLookScript;
+
+    /// <summary>
+    /// Initializes player state, UI, and camera.
+    /// </summary>
     void Start()
     {
         UpdateCoinUI();
@@ -53,7 +146,7 @@ public class PlayerBehaviour : MonoBehaviour
 
 
         startPosition = transform.position;
-            
+
         if (Camera.main != null)
         {
             mainCameraTransform = Camera.main.transform;
@@ -62,14 +155,17 @@ public class PlayerBehaviour : MonoBehaviour
 
             mouseLookScript = mainCameraTransform.GetComponent<MouseLook>();
         }
-            
-        }
 
+        audioSource = GetComponent<AudioSource>();
+    }
 
-        void Update()
-        {
-            if (Camera.main == null) return;
-            if (Input.GetKeyDown(interactKey))
+    /// <summary>
+    /// Checks for interaction input and handles object interactions.
+    /// </summary>
+    void Update()
+    {
+        if (Camera.main == null) return;
+        if (Input.GetKeyDown(interactKey))
         {
             RaycastHit hit;
 
@@ -104,45 +200,87 @@ public class PlayerBehaviour : MonoBehaviour
             }
         }
 
-        }
+    }
 
-        public void TakeDamage(float amount)
+    /// <summary>
+    /// Reduces player's health and checks for death.
+    /// </summary>
+    /// <param name="amount">Amount of damage to apply.</param>
+    public void TakeDamage(float amount)
+    {
+        currentHealth -= Mathf.RoundToInt(amount);
+        UpdateHealthUI();
+
+        if (currentHealth <= 0)
         {
-            currentHealth -= Mathf.RoundToInt(amount);
-            UpdateHealthUI();
-
-            if (currentHealth <= 0)
-            {
-                Die();
-            }
+            Die();
         }
 
-        void Die()
+    }
+
+    /// <summary>
+    /// Handles player death sequence including sound, UI, and disabling control.
+    /// </summary>
+    void Die()
+    {
+
+        Debug.Log("Player has died");
+
+        if (audioSource != null && deathSound != null)
         {
-            Debug.Log("Player has died");
-
-            if (deathMessageText != null)
-            {
-                deathMessageText.gameObject.SetActive(true);
-                deathMessageText.text = "You died!";
-            }
-            
-            StartCoroutine(RespawnPlayer());
+            // Play death sound
+            audioSource.PlayOneShot(deathSound);
         }
 
+
+        // Show red death screen and "You died!" message
+        if (deathScreenPanel != null)
+            deathScreenPanel.SetActive(true);
+
+        if (deathMessageText != null)
+        {
+            deathMessageText.gameObject.SetActive(true);
+            deathMessageText.text = "You died!";
+        }
+
+        // Hide UI elements like health and coin count
+        if (healthText != null)
+            healthText.gameObject.SetActive(false);
+
+        if (CoinText != null)
+            CoinText.gameObject.SetActive(false);
+
+        // Freeze player movement and camera look
+        PlayerMovement movement = GetComponent<PlayerMovement>();
+        if (movement != null)
+            movement.enabled = false;
+
+        if (mouseLookScript != null)
+            mouseLookScript.enabled = false;
+
+        StartCoroutine(RespawnPlayer());
+        
+    }
+
+    /// <summary>
+    /// Handles player respawn logic including resetting health, position, camera, and UI.
+    /// </summary>
     IEnumerator RespawnPlayer()
     {
+
         yield return new WaitForSeconds(2f);
 
         // Reset position
-        transform.position = startPosition;
+        transform.position = startPosition + Vector3.up * 0.5f;
 
         // Reset velocity
         Rigidbody rb = GetComponent<Rigidbody>();
         if (rb != null)
         {
+
             rb.linearVelocity = Vector3.zero;
             rb.angularVelocity = Vector3.zero;
+
         }
 
         // Reset health
@@ -151,8 +289,14 @@ public class PlayerBehaviour : MonoBehaviour
 
         // Reset player scale and jump
         PlayerMovement movement = GetComponent<PlayerMovement>();
+
         if (movement != null)
+        {
+            // Slightly lower the player to ensure grounded raycast hits
+            transform.position += Vector3.down * 0.05f;
             movement.ResetJumpState();
+            
+        }
 
         // Wait one frame to ensure visuals and movement are settled
         yield return new WaitForEndOfFrame();
@@ -160,8 +304,10 @@ public class PlayerBehaviour : MonoBehaviour
         // Hide death message
         if (deathMessageText != null)
         {
+
             deathMessageText.text = "";
             deathMessageText.gameObject.SetActive(false);
+
         }
 
         // Reset camera position
@@ -175,68 +321,124 @@ public class PlayerBehaviour : MonoBehaviour
 
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
-            
-            if (mainCameraTransform != null)
-            {
-                mainCameraTransform.localPosition = initialCameraLocalPos;
-                mainCameraTransform.localRotation = initialCameraLocalRot;
+
+        if (mainCameraTransform != null)
+        {
+
+            mainCameraTransform.localPosition = initialCameraLocalPos;
+            mainCameraTransform.localRotation = initialCameraLocalRot;
 
             if (mouseLookScript != null)
                 mouseLookScript.ResetLook();
-            }
-        
 
         }
 
-        void UpdateHealthUI()
+        // Re-enable movement and look scripts after respawn
+        if (movement != null)
+            movement.enabled = true;
+
+        if (mouseLookScript != null)
+            mouseLookScript.enabled = true;
+
+        // Restore UI
+        if (deathScreenPanel != null)
+            deathScreenPanel.SetActive(false);
+
+        if (deathMessageText != null)
         {
-            if (healthText != null)
-            {
-                healthText.text = "Health: " + currentHealth;
-            }
+            deathMessageText.text = "";
+            deathMessageText.gameObject.SetActive(false);
         }
 
-        IEnumerator ShowMessage(string message, float duration)
-        {
-            interactionMessageText.text = message;
-            interactionMessageText.gameObject.SetActive(true);
+        if (healthText != null)
+            healthText.gameObject.SetActive(true);
 
-            yield return new WaitForSeconds(duration);
+        if (CoinText != null)
+            CoinText.gameObject.SetActive(true);
 
-            interactionMessageText.gameObject.SetActive(false);
-        }
-
-        public void CollectCoin(int amount)
-        {
-            coinCount += amount;
-            UpdateCoinUI();
-
-            // Check if player won
-            if (coinCount >= totalCollectibles)
-            {
-                WinGame();
-            }
-        }
-
-        void WinGame()
-        {
-            if (winMessageText != null)
-            {
-                winMessageText.gameObject.SetActive(true);
-                winMessageText.text = "Congratulations! You collected all coins!";
-            }
-
-            // Optional: Freeze player movement here or do other win actions
-            Debug.Log("Player has won the game!");
-        }
-
-        void UpdateCoinUI()
-        {
-            if (CoinText != null)
-            {
-                CoinText.text = "Coins: " + coinCount + " / " + totalCollectibles;
-            }
-        }
-
-        
     }
+
+    /// <summary>
+    /// Updates the health UI text to reflect current health.
+    /// </summary>
+    void UpdateHealthUI()
+    {
+        if (healthText != null)
+        {
+            healthText.text = "Health: " + currentHealth;
+        }
+    }
+
+    /// <summary>Displays a message on screen for a limited duration.</summary>
+    /// <param name="message">Message to show.</param>
+    /// <param name="duration">Duration in seconds to show the message.</param>
+    IEnumerator ShowMessage(string message, float duration)
+    {
+
+        interactionMessageText.text = message;
+        interactionMessageText.gameObject.SetActive(true);
+
+        yield return new WaitForSeconds(duration);
+
+        interactionMessageText.gameObject.SetActive(false);
+
+    }
+
+    /// <summary>
+    /// Adds coins to the player's total and checks for win condition.
+    /// </summary>
+    /// <param name="amount">Number of coins collected.</param>
+    public void CollectCoin(int amount)
+    {
+        coinCount += amount;
+        UpdateCoinUI();
+
+        audioSource.PlayOneShot(coinSound);
+
+        // Check if player won
+        if (coinCount >= totalCollectibles)
+        {
+            WinGame();
+        }
+    }
+
+    /// <summary>
+    /// Handles win condition: displays message and plays victory music.
+    /// </summary>
+    void WinGame()
+    {
+        if (winMessageText != null)
+        {
+            winMessageText.gameObject.SetActive(true);
+            winMessageText.text = "Congratulations! You collected all coins!";
+        }
+
+        
+        Debug.Log("Player has won the game!");
+
+        // Stop current sound
+        audioSource.Stop();
+
+        // Play BGM set 
+        if (victoryBGM != null)
+        {
+            audioSource.clip = victoryBGM;
+            audioSource.loop = false;
+            audioSource.Play();
+        }
+
+    }
+
+    /// <summary>
+    /// Updates the coin count UI text.
+    /// </summary>
+    void UpdateCoinUI()
+    {
+        if (CoinText != null)
+        {
+            CoinText.text = "Coins: " + coinCount + " / " + totalCollectibles;
+        }
+    }
+
+
+}
